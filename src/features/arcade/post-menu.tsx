@@ -1,0 +1,11 @@
+import {useState} from 'react';
+import {MoreHorizontal,Trash2,Flag} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {DropdownMenu,DropdownMenuTrigger,DropdownMenuContent,DropdownMenuItem} from '@/components/ui/dropdown-menu';
+import {Dialog,DialogContent,DialogTitle,DialogDescription} from '@/components/ui/dialog';
+import type {Post} from './store';
+export function PostMenu({post,onDelete,onReport}:{post:Post;onDelete:()=>void;onReport:(reason:string)=>void}){
+ const [action,setAction]=useState<'delete'|'report'|null>(null),[reason,setReason]=useState('Spam');
+ return <><DropdownMenu><DropdownMenuTrigger asChild><Button className="post-menu-trigger" variant="ghost" size="icon" aria-label={`Opções da publicação de ${post.author}`}><MoreHorizontal/></Button></DropdownMenuTrigger><DropdownMenuContent align="end" onClick={e=>e.stopPropagation()}>{post.own?<DropdownMenuItem className="post-delete" onSelect={()=>setAction('delete')}><Trash2/>Deletar</DropdownMenuItem>:<DropdownMenuItem onSelect={()=>setAction('report')}><Flag/>Denunciar</DropdownMenuItem>}</DropdownMenuContent></DropdownMenu>
+ <Dialog open={action!==null} onOpenChange={open=>{if(!open)setAction(null)}}><DialogContent className="arcade-dialog" onClick={e=>e.stopPropagation()}><DialogTitle>{action==='delete'?'Deletar publicação?':'Denunciar publicação'}</DialogTitle><DialogDescription>{action==='delete'?'A publicação e os seus comentários serão eliminados. Esta ação não pode ser desfeita.':'O serviço de moderação está indisponível. Podes guardar um registo da ocorrência.'}</DialogDescription>{action==='delete'?<div className="action-row"><Button variant="secondary" onClick={()=>setAction(null)}>Cancelar</Button><Button className="post-delete-confirm" onClick={()=>{if(post.own){onDelete();setAction(null)}}}>Deletar</Button></div>:<form className="arcade-form" onSubmit={e=>{e.preventDefault();if(!post.own){onReport(reason);setAction(null)}}}><label>Motivo<select value={reason} onChange={e=>setReason(e.target.value)}>{['Spam','Assédio ou discurso de ódio','Conteúdo inadequado','Fraude','Outro'].map(r=><option key={r}>{r}</option>)}</select></label><Button type="submit">Guardar registo</Button></form>}</DialogContent></Dialog></>
+}

@@ -1,0 +1,28 @@
+import React from 'react';
+import {beforeEach,afterEach,it,expect,vi} from 'vitest';
+import {render,screen,fireEvent,cleanup,waitFor,within} from '@testing-library/react';
+import {RouterProvider,createMemoryHistory} from '@tanstack/react-router';
+import {getRouter} from '../../router';
+import {defaults,STORAGE_KEY} from './store';
+beforeEach(()=>{localStorage.clear();Element.prototype.scrollIntoView=vi.fn()});afterEach(cleanup);
+it('follows and sends from a chat profile preview while retaining the live and conversation',async()=>{
+ localStorage.setItem(STORAGE_KEY,JSON.stringify({...defaults,messages:{s0:[{id:'visitor',author:'BiaCraft · exemplo',own:false,text:'Olá live'}]}}));
+ const router=getRouter();router.update({context:router.options.context,history:createMemoryHistory({initialEntries:['/ao-vivo?live=s0']})});await router.load();render(<RouterProvider router={router}/>);
+ fireEvent.click(await screen.findByRole('button',{name:'Prévia do perfil de BiaCraft'}));
+ const dialog=within(screen.getByRole('dialog'));
+ fireEvent.click(dialog.getByRole('button',{name:'Seguir BiaCraft'}));
+ expect(dialog.getByRole('button',{name:'Deixar de seguir BiaCraft'})).toHaveAttribute('aria-pressed','true');
+ fireEvent.click(dialog.getByRole('button',{name:'Mensagem'}));
+ fireEvent.change(dialog.getByRole('textbox',{name:'Mensagem para BiaCraft'}),{target:{value:'Vamos jogar?'}});
+ fireEvent.click(dialog.getByRole('button',{name:'Enviar mensagem'}));
+ expect(dialog.getByRole('status')).toHaveTextContent('Mensagem guardada');
+ expect(router.state.location.href).toBe('/ao-vivo?live=s0');
+ await waitFor(()=>expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).conversations.find((t:any)=>t.name==='BiaCraft').messages.at(-1).text).toBe('Vamos jogar?'));
+ fireEvent.click(dialog.getByRole('link',{name:'Ver perfil completo'}));
+ expect(await screen.findByRole('heading',{name:'@biacraft',level:1})).toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Mensagem'}));
+ expect(screen.getByRole('textbox',{name:'Mensagem para BiaCraft'})).toBeInTheDocument();
+ fireEvent.change(screen.getByRole('textbox',{name:'Mensagem para BiaCraft'}),{target:{value:'Até já'}});
+ fireEvent.click(screen.getByRole('button',{name:'Enviar mensagem'}));
+ await waitFor(()=>{const threads=JSON.parse(localStorage.getItem(STORAGE_KEY)!).conversations.filter((t:any)=>t.name==='BiaCraft');expect(threads).toHaveLength(1);expect(threads[0].messages.slice(-2).map((m:any)=>m.text)).toEqual(['Vamos jogar?','Até já'])});
+},30000);

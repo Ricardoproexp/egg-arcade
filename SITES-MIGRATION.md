@@ -1,0 +1,2 @@
+Imported from https://github.com/Ricardoproexp/omlet-arcade-revival at 3d8c20ac599ed21063c103750cd289e93f236a9b.
+Adapted to static React/Vite hosting with original route shell and UI. Original banner and Legends images retained. Four games only contain Lovable asset descriptors; labeled SVG placeholders are used until original media is provided. Data remains local to the browser; no real multiuser backend.

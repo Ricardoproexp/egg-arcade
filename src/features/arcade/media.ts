@@ -1,0 +1,10 @@
+import banner from '@/assets/community-banner.jpg';
+import legends from '@/assets/legends.jpg';
+const minecraft = {url: '/media/minecraft.svg'};
+const pubg = {url: '/media/pubg.svg'};
+const freefire = {url: '/media/freefire.svg'};
+const roblox = {url: '/media/roblox.svg'};
+export { banner };
+export const images: Record<string, string> = { minecraft: minecraft.url, pubg: pubg.url, freefire: freefire.url, roblox: roblox.url, legends, Minecraft: minecraft.url, 'PUBG Mobile': pubg.url, 'Free Fire': freefire.url, 'Mobile Legends': legends, Roblox: roblox.url };
+export type Stream={id:string;avatar:string;description:string;audience:number;popularity:number;game:string;creator:string;title:string;viewers:string;image:string};
+export const streams:Stream[]=[];
